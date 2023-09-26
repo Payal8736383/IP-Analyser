@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .input-container {
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IP Information</h1>
+    </header>
+    <main>
+        <div class="input-container">
+            <label for="ip-address">Enter IP Address:</label>
+            <input type="text" id="ip-address" placeholder="e.g., 103.181.91.131">
+            <button id="fetch-button">Fetch Info</button>
+        </div>
+        <div id="result-container" class="hidden">
+            <h2>IP Details:</h2>
+            <p><strong>IP Address:</strong> <span id="ip-info"></span></p>
+            <p><strong>ISP:</strong> <span id="isp"></span></p>
+            <p><strong>ASN:</strong> <span id="asn"></span></p>
+            <p><strong>City:</strong> <span id="city"></span></p>
+            <p><strong>Region:</strong> <span id="region"></span></p>
+            <p><strong>Country:</strong> <span id="country"></span></p>
+            <p><strong>Location:</strong> <span id="location"></span></p>
+        </div>
+        <div id="error-container" class="hidden">
+            <p id="error-message"></p>
+        </div>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        const fetchButton = document.getElementById("fetch-button");
+        const ipAddressInput = document.getElementById("ip-address");
+        const resultContainer = document.getElementById("result-container");
+        const errorContainer = document.getElementById("error-container");
+        const ipInfoElement = document.getElementById("ip-info");
+        const ispElement = document.getElementById("isp");
+        const asnElement = document.getElementById("asn");
+        const cityElement = document.getElementById("city");
+        const regionElement = document.getElementById("region");
+        const countryElement = document.getElementById("country");
+        const locationElement = document.getElementById("location");
+        const errorMessageElement = document.getElementById("error-message");
+            
+        fetchButton.addEventListener("click", () => {
+            const ip_address = ipAddressInput.value.trim();
+            if (ip_address === "") {
+                showError("Please enter an IP address.");
+                return;
+            }
+        
+            const url = `https://ipinfo.io/${ip_address}/json`;
+            const headers = {
+                'Authorization': 'Bearer 2fa007984e53b5'
+            };
+        
+            fetch(url, { headers })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        showError(`Failed to retrieve IP details. Status code: ${response.status}`);
+                }
+            })
+            .then(data => {
+                if (data) {
+                    showResult(data);
+                }
+            })
+            .catch(error => {
+                showError("An error occurred while fetching IP details.");
+                console.error(error);
+            });
+        });
+
+        function showResult(ip_info) {
+            ipInfoElement.textContent = ip_info.ip;
+            const parts = ip_info.org.split(' ');
+            ispElement.textContent = parts.slice(1).join(' ');
+            asnElement.textContent = parts[0];
+            cityElement.textContent = ip_info.city;
+            regionElement.textContent = ip_info.region;
+            countryElement.textContent = ip_info.country;
+            locationElement.textContent = ip_info.loc;
+
+            resultContainer.classList.remove("hidden");
+            errorContainer.classList.add("hidden");
+        }
+
+        function showError(message) {
+            errorMessageElement.textContent = message;
+            errorContainer.classList.remove("hidden");
+            resultContainer.classList.add("hidden");
+        }
+        });
+
+    </script>
+</body>
+</html>
